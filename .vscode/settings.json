@@ -1,5 +1,7 @@
 {
   "files.associations": {
-    "new": "cpp"
+    "new": "cpp",
+    "text_encoding": "cpp",
+    "typeinfo": "cpp"
   }
 }
