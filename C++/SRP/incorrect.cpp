@@ -3,22 +3,22 @@
 
 using namespace std;
 
-// Product class representing any item of any ECommerce.
+// Product class representing any item in eCommerce.
 class Product {
 public:
     string name;
     double price;
- 
+
     Product(string name, double price) {
         this->name = name;
         this->price = price;
     }
 };
 
-// Violating SRP: ShoppingCart is handling multiple responsibilities
+//1. ShoppingCart: Only responsible for Cart related business logic.
 class ShoppingCart {
 private:
-    vector<Product*> products; 
+    vector<Product*> products;
 
 public:
     void addProduct(Product* p) { 
@@ -29,7 +29,7 @@ public:
         return products;
     } 
 
-    // 1. Calculates total price in cart.
+    //Calculates total price in cart.
     double calculateTotal() {
         double total = 0;
         for (auto p : products) {
@@ -37,19 +37,33 @@ public:
         }
         return total;
     }
+};
 
-    // 2. Violating SRP - Prints invoice (Should be in a separate class)
-    void printInvoice() {
+// 2. ShoppingCartPrinter: Only responsible for printing invoices
+class ShoppingCartPrinter {
+public:
+    void printInvoice(ShoppingCart* cart) {
         cout << "Shopping Cart Invoice:\n";
-        for (auto p : products) {
+        for (auto p : cart->getProducts()) {
             cout << p->name << " - Rs " << p->price << endl;
         }
-        cout << "Total: Rs " << calculateTotal() << endl;
+        cout << "Total: Rs " << cart->calculateTotal() << endl;
+    }
+};
+
+// 3. ShoppingCartStorage: Only responsible for saving cart to DB
+class ShoppingCartStorage {
+public:
+    void saveToSQLDatabase(ShoppingCart* cart) {
+        cout << "Saving shopping cart to SQL DB..." << endl;
     }
 
-    // 3. Violating SRP - Saves to DB (Should be in a separate class)
-    void saveToDatabase() {
-        cout << "Saving shopping cart to database..." << endl;
+    void saveToMongoDatabase(ShoppingCart* cart) {
+        cout << "Saving shopping cart to Mongo DB..." << endl;
+    }
+
+    void saveToFile(ShoppingCart* cart) {
+        cout << "Saving shopping cart to File..." << endl;
     }
 };
 
@@ -59,9 +73,11 @@ int main() {
     cart->addProduct(new Product("Laptop", 50000));
     cart->addProduct(new Product("Mouse", 2000));
 
-    cart->calculateTotal();
-    cart->printInvoice();  
-    cart->saveToDatabase();
+    ShoppingCartPrinter* printer = new ShoppingCartPrinter();
+    printer->printInvoice(cart);
+
+    ShoppingCartStorage* db = new ShoppingCartStorage();
+    db->saveToSQLDatabase(cart);
 
     return 0;
 }
